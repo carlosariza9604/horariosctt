@@ -43,6 +43,7 @@ function nombreAEmail(nombre: string) {
 function PaginaPDF({ pdfUrl, pagina }: { pdfUrl: string, pagina: number }) {
   const [imagenUrl, setImagenUrl] = useState<string>('')
   const [cargando, setCargando] = useState(true)
+  const [zoom, setZoom] = useState(1)
 
   useEffect(() => {
     async function renderizar() {
@@ -55,19 +56,17 @@ function PaginaPDF({ pdfUrl, pagina }: { pdfUrl: string, pagina: number }) {
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
         const paginaPDF = await pdf.getPage(pagina)
 
-        const viewport = paginaPDF.getViewport({ scale: 1.8 })
+        const viewport = paginaPDF.getViewport({ scale: 2.5 })
         const canvas = document.createElement('canvas')
         canvas.width = viewport.width
         canvas.height = viewport.height
         const ctx = canvas.getContext('2d')
-
         if (!ctx) return
 
         const task = paginaPDF.render({
           canvasContext: ctx,
           viewport: viewport
         } as any)
-
         await task.promise
 
         setImagenUrl(canvas.toDataURL('image/png'))
@@ -84,26 +83,37 @@ function PaginaPDF({ pdfUrl, pagina }: { pdfUrl: string, pagina: number }) {
   if (!imagenUrl) return <p style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>Error al cargar horario</p>
 
   return (
-  <div style={{ 
-    overflowX: 'auto', 
-    overflowY: 'auto',
-    width: '100%',
-    cursor: 'zoom-in'
-  }}>
-    <img
-      src={imagenUrl}
-      alt="Horario"
-      style={{
-        width: '100%',
-        minWidth: '800px',
-        borderRadius: '0.5rem',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        touchAction: 'manipulation'
-      }}
-    />
-  </div>
-)
-   
+    <div>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+        <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))}
+          style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', borderRadius: '0.5rem', border: '1px solid #ddd', cursor: 'pointer', backgroundColor: 'white' }}>
+          ➖
+        </button>
+        <span style={{ fontSize: '0.9rem', color: '#666' }}>{Math.round(zoom * 100)}%</span>
+        <button onClick={() => setZoom(z => Math.min(3, z + 0.25))}
+          style={{ padding: '0.5rem 1rem', fontSize: '1.2rem', borderRadius: '0.5rem', border: '1px solid #ddd', cursor: 'pointer', backgroundColor: 'white' }}>
+          ➕
+        </button>
+        <button onClick={() => setZoom(1)}
+          style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', borderRadius: '0.5rem', border: '1px solid #ddd', cursor: 'pointer', backgroundColor: 'white' }}>
+          Reset
+        </button>
+      </div>
+      <div style={{ overflowX: 'auto', width: '100%' }}>
+        <img
+          src={imagenUrl}
+          alt="Horario"
+          style={{
+            width: `${zoom * 100}%`,
+            minWidth: '300px',
+            borderRadius: '0.5rem',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            display: 'block'
+          }}
+        />
+      </div>
+    </div>
+  )
 }
 
 export default function App() {
@@ -182,7 +192,6 @@ export default function App() {
     setSubiendo(true)
 
     try {
-      // 1. Subir PDF a Storage
       const nombreArchivo = `${trimestreAdmin}.pdf`
       const { error: errStorage } = await supabase.storage
         .from('horarios')
@@ -193,13 +202,11 @@ export default function App() {
         return
       }
 
-      // 2. Obtener URL pública
       const { data: urlData } = supabase.storage
         .from('horarios')
         .getPublicUrl(nombreArchivo)
       const pdfUrl = urlData.publicUrl
 
-      // 3. Leer páginas
       const pdfjsLib = await import('pdfjs-dist')
       pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`
 
