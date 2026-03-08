@@ -84,20 +84,26 @@ function PaginaPDF({ pdfUrl, pagina }: { pdfUrl: string, pagina: number }) {
   if (!imagenUrl) return <p style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>Error al cargar horario</p>
 
   return (
-    <div style={{ overflowX: 'auto', overflowY: 'auto', WebkitOverflowScrolling: 'touch' as any }}>
-      <img
-        src={imagenUrl}
-        alt="Horario"
-        style={{
-          width: '200%',
-          maxWidth: '1200px',
-          borderRadius: '0.5rem',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-          touchAction: 'pan-x pan-y'
-        }}
-      />
-    </div>
-  )
+  <div style={{ 
+    overflowX: 'auto', 
+    overflowY: 'auto',
+    width: '100%',
+    cursor: 'zoom-in'
+  }}>
+    <img
+      src={imagenUrl}
+      alt="Horario"
+      style={{
+        width: '100%',
+        minWidth: '800px',
+        borderRadius: '0.5rem',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        touchAction: 'manipulation'
+      }}
+    />
+  </div>
+)
+   
 }
 
 export default function App() {
