@@ -115,7 +115,65 @@ function PaginaPDF({ pdfUrl, pagina }: { pdfUrl: string, pagina: number }) {
     </div>
   )
 }
+function ListaHorarios() {
+  const [lista, setLista] = useState<any[]>([])
+  const [eliminando, setEliminando] = useState<string>('')
 
+  useEffect(() => {
+    cargar()
+  }, [])
+
+  async function cargar() {
+    // Obtiene los trimestres únicos que hay en la tabla horarios
+    const { data } = await supabase
+      .from('horarios')
+      .select('trimestre')
+      .order('trimestre', { ascending: false })
+
+    // Filtra para no repetir trimestres
+    const unicos = [...new Set(data?.map((h: any) => h.trimestre) || [])]
+    setLista(unicos)
+  }
+
+  async function eliminar(trimestre: string) {
+    if (!confirm(`¿Seguro que quieres eliminar el trimestre "${trimestre}"?`)) return
+    setEliminando(trimestre)
+
+    // Elimina todos los horarios de ese trimestre en la tabla
+    await supabase.from('horarios').delete().eq('trimestre', trimestre)
+
+    // Elimina el PDF del storage
+    await supabase.storage.from('horarios').remove([`${trimestre}.pdf`])
+
+    await cargar()
+    setEliminando('')
+  }
+
+  if (lista.length === 0) return <p style={{ color: '#999', fontSize: '0.9rem' }}>No hay horarios subidos aún.</p>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+      {lista.map((trimestre: string) => (
+        <div key={trimestre} style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '0.75rem', backgroundColor: '#f8f9ff',
+          borderRadius: '0.5rem', border: '1px solid #e0e7ff'
+        }}>
+          <span style={{ fontSize: '0.95rem', color: '#333' }}>📅 {trimestre}</span>
+          <button
+            onClick={() => eliminar(trimestre)}
+            style={{
+              backgroundColor: '#ef4444', color: 'white',
+              border: 'none', padding: '0.4rem 0.75rem',
+              borderRadius: '0.5rem', cursor: 'pointer', fontSize: '0.85rem'
+            }}>
+            {eliminando === trimestre ? 'Eliminando...' : '🗑️ Eliminar'}
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+} 
 export default function App() {
   const [session, setSession] = useState<any>(null)
   const [perfil, setPerfil] = useState<any>(null)
@@ -276,6 +334,8 @@ export default function App() {
       </div>
       <div style={s.content}>
         <div style={s.card2}>
+          <h3>🗑️ Horarios subidos</h3><ListaHorarios />
+          <hr style={{ margin: '1rem 0', border: 'none', borderTop: '1px solid #eee' }} />
           <h3>📄 Subir PDF de horarios</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <input type="text" placeholder="Nombre del trimestre (ej: 2025-Trimestre-1)"
