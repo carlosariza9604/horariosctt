@@ -307,9 +307,17 @@ export default function App() {
         <p style={{ margin: 0, fontSize: '0.75rem', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
            SENA
              </p>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>
-                 Centro de Tecnologías del Transporte
-  </p>
+              <p style={{ 
+              margin: 0, 
+              fontSize: '1rem', 
+              color: '#16a34a', 
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+               textAlign: 'center'
+}}>
+  Centro de Tecnologías del Transporte
+</p>
 </div>
 <h2 style={s.titulo}>📅 Horarios</h2>
 <p style={s.subtitulo}>{modo === 'login' ? 'Inicia sesión' : 'Regístrate'}</p>
@@ -413,7 +421,7 @@ const s: any = {
   titulo: { textAlign: 'center', margin: 0, color: '#1a1a2e' },
   subtitulo: { textAlign: 'center', margin: 0, color: '#666', fontSize: '0.9rem' },
   input: { padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ddd', fontSize: '1rem', width: '100%', boxSizing: 'border-box' },
-  boton: { padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: '#4f46e5', color: 'white', border: 'none', fontSize: '1rem', cursor: 'pointer' },
+  boton: { padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: '#16a34a', color: 'white', border: 'none', fontSize: '1rem', cursor: 'pointer' },
   error: { color: 'red', fontSize: '0.85rem', margin: 0 },
   exito: { color: 'green', fontSize: '0.85rem', margin: 0 },
   link: { textAlign: 'center', color: '#4f46e5', cursor: 'pointer', fontSize: '0.85rem' },
