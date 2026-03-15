@@ -101,7 +101,7 @@ function PaginaPDF({ pdfUrl, pagina }: { pdfUrl: string, pagina: number }) {
       </div>
       <div style={{ overflowX: 'auto', width: '100%' }}>
         <img
-          src="/sena.png"
+          src={imagenUrl}
           alt="Horario"
           style={{
             width: `${zoom * 100}%`,
@@ -115,6 +115,7 @@ function PaginaPDF({ pdfUrl, pagina }: { pdfUrl: string, pagina: number }) {
     </div>
   )
 }
+
 function ListaHorarios() {
   const [lista, setLista] = useState<any[]>([])
   const [eliminando, setEliminando] = useState<string>('')
@@ -124,13 +125,10 @@ function ListaHorarios() {
   }, [])
 
   async function cargar() {
-    // Obtiene los trimestres únicos que hay en la tabla horarios
     const { data } = await supabase
       .from('horarios')
       .select('trimestre')
       .order('trimestre', { ascending: false })
-
-    // Filtra para no repetir trimestres
     const unicos = [...new Set(data?.map((h: any) => h.trimestre) || [])]
     setLista(unicos)
   }
@@ -138,13 +136,8 @@ function ListaHorarios() {
   async function eliminar(trimestre: string) {
     if (!confirm(`¿Seguro que quieres eliminar el trimestre "${trimestre}"?`)) return
     setEliminando(trimestre)
-
-    // Elimina todos los horarios de ese trimestre en la tabla
     await supabase.from('horarios').delete().eq('trimestre', trimestre)
-
-    // Elimina el PDF del storage
     await supabase.storage.from('horarios').remove([`${trimestre}.pdf`])
-
     await cargar()
     setEliminando('')
   }
@@ -160,8 +153,7 @@ function ListaHorarios() {
           borderRadius: '0.5rem', border: '1px solid #e0e7ff'
         }}>
           <span style={{ fontSize: '0.95rem', color: '#333' }}>📅 {trimestre}</span>
-          <button
-            onClick={() => eliminar(trimestre)}
+          <button onClick={() => eliminar(trimestre)}
             style={{
               backgroundColor: '#ef4444', color: 'white',
               border: 'none', padding: '0.4rem 0.75rem',
@@ -173,7 +165,8 @@ function ListaHorarios() {
       ))}
     </div>
   )
-} 
+}
+
 export default function App() {
   const [session, setSession] = useState<any>(null)
   const [perfil, setPerfil] = useState<any>(null)
@@ -303,17 +296,16 @@ export default function App() {
   if (!session) return (
     <div style={s.center}>
       <div style={s.card}>
-       <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
-        <p style={{ margin: 0, fontSize: '0.75rem', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-           SENA
-             </p>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>
-                 Centro de Tecnologías del Transporte
-  </p>
-</div>
-<h2 style={s.titulo}>📅 Horarios</h2>
-<p style={s.subtitulo}>{modo === 'login' ? 'Inicia sesión' : 'Regístrate'}</p>
-       
+        <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: '#4f46e5', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            SENA
+          </p>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>
+            Centro de Tecnologías del Transporte
+          </p>
+        </div>
+        <h2 style={s.titulo}>📅 Horarios</h2>
+        <p style={s.subtitulo}>{modo === 'login' ? 'Inicia sesión' : 'Regístrate'}</p>
         <select style={s.input} value={nombre} onChange={e => setNombre(e.target.value)}>
           <option value="">-- Selecciona tu nombre --</option>
           {NOMBRES.map(n => <option key={n} value={n}>{n}</option>)}
@@ -343,7 +335,8 @@ export default function App() {
       </div>
       <div style={s.content}>
         <div style={s.card2}>
-          <h3>🗑️ Horarios subidos</h3><ListaHorarios />
+          <h3>🗑️ Horarios subidos</h3>
+          <ListaHorarios />
           <hr style={{ margin: '1rem 0', border: 'none', borderTop: '1px solid #eee' }} />
           <h3>📄 Subir PDF de horarios</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
