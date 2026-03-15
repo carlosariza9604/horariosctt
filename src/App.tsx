@@ -231,17 +231,31 @@ function ListaFichas() {
             borderRadius: '0.5rem', border: '1px solid #e0e7ff'
           }}>
             <span style={{ fontSize: '0.9rem', color: '#333' }}>
-              📄 {ficha.name.replace(/\.(xls|xlsx)$/i, '')}
-            </span>
-            <button
-              onClick={() => eliminarFicha(ficha.name)}
-              style={{
-                backgroundColor: '#ef4444', color: 'white',
-                border: 'none', padding: '0.3rem 0.6rem',
-                borderRadius: '0.5rem', cursor: 'pointer', fontSize: '0.85rem'
-              }}>
-              {eliminando === ficha.name ? '...' : '✕'}
-            </button>
+           📄 {ficha.name.replace(/\.(xls|xlsx)$/i, '')}
+           </span>
+           <div style={{ display: 'flex', gap: '0.5rem' }}>
+           <button
+           onClick={() => {
+           const { data } = supabase.storage.from('fichas').getPublicUrl(ficha.name)
+            window.open(data.publicUrl, '_blank')
+    }}
+    style={{
+      backgroundColor: '#4f46e5', color: 'white',
+      border: 'none', padding: '0.3rem 0.6rem',
+      borderRadius: '0.5rem', cursor: 'pointer', fontSize: '0.85rem'
+    }}>
+    ⬇️
+  </button>
+  <button
+    onClick={() => eliminarFicha(ficha.name)}
+    style={{
+      backgroundColor: '#ef4444', color: 'white',
+      border: 'none', padding: '0.3rem 0.6rem',
+      borderRadius: '0.5rem', cursor: 'pointer', fontSize: '0.85rem'
+    }}>
+    {eliminando === ficha.name ? '...' : '✕'}
+  </button>
+</div>
           </div>
         ))}
       </div>
