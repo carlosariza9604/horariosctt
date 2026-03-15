@@ -101,7 +101,7 @@ function PaginaPDF({ pdfUrl, pagina }: { pdfUrl: string, pagina: number }) {
       </div>
       <div style={{ overflowX: 'auto', width: '100%' }}>
         <img
-          src={imagenUrl}
+          src="/sena.png"
           alt="Horario"
           style={{
             width: `${zoom * 100}%`,
@@ -303,8 +303,17 @@ export default function App() {
   if (!session) return (
     <div style={s.center}>
       <div style={s.card}>
-        <h2 style={s.titulo}>📅 Horarios</h2>
-        <p style={s.subtitulo}>{modo === 'login' ? 'Inicia sesión' : 'Regístrate'}</p>
+       <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+        <p style={{ margin: 0, fontSize: '0.75rem', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+           SENA
+             </p>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>
+                 Centro de Tecnologías del Transporte
+  </p>
+</div>
+<h2 style={s.titulo}>📅 Horarios</h2>
+<p style={s.subtitulo}>{modo === 'login' ? 'Inicia sesión' : 'Regístrate'}</p>
+       
         <select style={s.input} value={nombre} onChange={e => setNombre(e.target.value)}>
           <option value="">-- Selecciona tu nombre --</option>
           {NOMBRES.map(n => <option key={n} value={n}>{n}</option>)}
