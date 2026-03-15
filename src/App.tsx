@@ -174,6 +174,80 @@ function ListaHorarios() {
     </div>
   )
 } 
+function ListaFichas() {
+  const [fichas, setFichas] = useState<any[]>([])
+  const [busqueda, setBusqueda] = useState('')
+  const [eliminando, setEliminando] = useState<string>('')
+
+  useEffect(() => {
+    cargarFichas()
+  }, [])
+
+  async function cargarFichas() {
+    const { data, error } = await supabase.storage
+      .from('fichas')
+      .list('', { limit: 1000, sortBy: { column: 'name', order: 'asc' } })
+    if (!error) setFichas(data || [])
+  }
+
+  async function eliminarFicha(nombre: string) {
+    if (!confirm(`¿Seguro que quieres eliminar la ficha "${nombre}"?`)) return
+    setEliminando(nombre)
+    await supabase.storage.from('fichas').remove([nombre])
+    await cargarFichas()
+    setEliminando('')
+  }
+
+  const fichasFiltradas = fichas.filter(f =>
+    f.name.toLowerCase().includes(busqueda.toLowerCase())
+  )
+
+  return (
+    <div style={{ marginTop: '1rem' }}>
+      <h3>📋 Fichas subidas</h3>
+
+      {/* Buscador */}
+      <input
+        type="text"
+        placeholder="🔍 Buscar por número de ficha..."
+        value={busqueda}
+        onChange={e => setBusqueda(e.target.value)}
+        style={{ ...s.input, marginBottom: '0.75rem' }}
+      />
+
+      {fichas.length === 0 && (
+        <p style={{ color: '#999', fontSize: '0.9rem' }}>No hay fichas subidas aún.</p>
+      )}
+
+      {fichasFiltradas.length === 0 && fichas.length > 0 && (
+        <p style={{ color: '#999', fontSize: '0.9rem' }}>No se encontró ninguna ficha.</p>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto' }}>
+        {fichasFiltradas.map(ficha => (
+          <div key={ficha.name} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '0.6rem 0.75rem', backgroundColor: '#f8f9ff',
+            borderRadius: '0.5rem', border: '1px solid #e0e7ff'
+          }}>
+            <span style={{ fontSize: '0.9rem', color: '#333' }}>
+              📄 {ficha.name.replace(/\.(xls|xlsx)$/i, '')}
+            </span>
+            <button
+              onClick={() => eliminarFicha(ficha.name)}
+              style={{
+                backgroundColor: '#ef4444', color: 'white',
+                border: 'none', padding: '0.3rem 0.6rem',
+                borderRadius: '0.5rem', cursor: 'pointer', fontSize: '0.85rem'
+              }}>
+              {eliminando === ficha.name ? '...' : '✕'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 export default function App() {
   const [session, setSession] = useState<any>(null)
   const [perfil, setPerfil] = useState<any>(null)
@@ -398,7 +472,8 @@ export default function App() {
             </button>
 
             <hr style={{ margin: '1.5rem 0', border: 'none', borderTop: '1px solid #eee' }} />
-
+             <ListaFichas />
+             <hr style={{ margin: '1.5rem 0', border: 'none', borderTop: '1px solid #eee' }} />
             <h3>📁 Subir fichas Excel</h3>
             <p style={{ color: '#666', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>
               Selecciona uno o varios archivos Excel. El número de ficha se tomará del nombre de cada archivo.
