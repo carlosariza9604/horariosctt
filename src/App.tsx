@@ -190,6 +190,10 @@ export default function App() {
   const [subiendo, setSubiendo] = useState(false)
   const [mensajeAdmin, setMensajeAdmin] = useState('')
   const [errorAdmin, setErrorAdmin] = useState('')
+  const [excelFiles, setExcelFiles] = useState<File[]>([])
+  const [subiendoZip, setSubiendoZip] = useState(false)
+  const [mensajeZip, setMensajeZip] = useState('')
+  const [errorZip, setErrorZip] = useState('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: any) => {
@@ -297,6 +301,34 @@ export default function App() {
     }
     setSubiendo(false)
   }
+  async function subirFichas() {
+  setErrorZip(''); setMensajeZip('')
+  if (excelFiles.length === 0) return setErrorZip('Selecciona al menos un archivo Excel')
+  setSubiendoZip(true)
+
+  let subidos = 0
+  let errores = 0
+
+  for (const archivo of excelFiles) {
+    const { error } = await supabase.storage
+      .from('fichas')
+      .upload(archivo.name, archivo, {
+        upsert: true,
+        contentType: 'application/vnd.ms-excel'
+      })
+
+    if (error) {
+      console.error(`Error subiendo ${archivo.name}:`, error)
+      errores++
+    } else {
+      subidos++
+    }
+  }
+
+  setMensajeZip(`✅ ${subidos} fichas subidas${errores > 0 ? ` (${errores} errores)` : ''}`)
+  setSubiendoZip(false)
+}
+
 
   if (loading) return <div style={s.center}><p>Cargando...</p></div>
 
@@ -364,6 +396,22 @@ export default function App() {
             <button style={s.boton} onClick={procesarPDF}>
               {subiendo ? 'Procesando...' : '📤 Subir y procesar PDF'}
             </button>
+
+            <hr style={{ margin: '1.5rem 0', border: 'none', borderTop: '1px solid #eee' }} />
+
+            <h3>📁 Subir fichas Excel</h3>
+            <p style={{ color: '#666', fontSize: '0.85rem', margin: '0 0 0.5rem 0' }}>
+              Selecciona uno o varios archivos Excel. El número de ficha se tomará del nombre de cada archivo.
+            </p>
+           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <input type="file" accept=".xls,.xlsx" multiple
+            onChange={e => setExcelFiles(Array.from(e.target.files || []))} style={s.input} />
+           {mensajeZip && <p style={{ color: 'green' }}>{mensajeZip}</p>}
+            {errorZip && <p style={{ color: 'red' }}>{errorZip}</p>}
+           <button style={s.boton} onClick={subirFichas}>
+            {subiendoZip ? 'Subiendo fichas...' : '📦 Subir fichas'}
+            </button>
+           </div>
           </div>
         </div>
       </div>
