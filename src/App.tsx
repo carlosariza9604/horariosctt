@@ -2,37 +2,127 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
-  'https://ugcavtjxvpcigotwhxkx.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnY2F2dGp4dnBjaWdvdHdoeGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIxOTAsImV4cCI6MjA4ODQ3ODE5MH0.GjPLPdQgK8f0YnYiUED0ECNf5nMdUa59inBxnZl9D6I'
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 )
 
 const NOMBRES = [
   'Administrador',
-  'Alexander Alzamora', 'Alvaro Jiménez', 'Ana Barreto',
-  'Angélica Cárdenas', 'Carlos Carreño', 'Cesar Rivera',
-  'Claudia Roncancio', 'Claudia Sánchez', 'Diego Díaz',
-  'Diego Nicolas Hortua', 'Dilan Triana', 'Edgar Garzón',
-  'Edilberto Tovar', 'Eduardo Camargo', 'Fabián Martínez',
-  'Felipe Medina', 'German Silva', 'Giovanny Mayorga',
-  'Gustavo Guevara', 'Henry Vásquez', 'Hugo Ávila',
-  'Humberto Chaparro', 'Iván Murillo', 'Jaider Mercado',
-  'Jairo Betancourt', 'Jairo Jiménez', 'Jairo López',
-  'Jeisson Andres Rodriguez', 'Jhon Castañeda', 'Jhon Meza',
-  'Jhon Peña', 'Jorge Vicente Guzmán', 'Jose Alfredo Segura',
-  'Jose Fernando Oliveros', 'Jose Luis Franco', 'Juan de Dios Fuentes',
-  'Kevin Castañeda', 'Laura Gómez', 'Laura Pulido',
-  'Lina Toro', 'Luis Ernesto Muñoz', 'Luis Miguel Huérfano',
-  'Luis Rojas', 'Marcela Rodríguez', 'Marco Fidel Rivas',
-  'Mario Remolina', 'Mauricio Garzón', 'Mauricio Rojas',
-  'Nelson Robayo', 'Nubia Cortés', 'Omar Parrado',
-  'Oscar Chaves', 'Paola Chaves', 'Pedro Rojas',
-  'Rafael Blanco', 'Raúl Daza', 'René Bedoya',
-  'Ricardo Rodríguez', 'Rodrigo Bautista', 'Rodrigo Huertas',
-  'Rover Abdel', 'Santiago Rodríguez', 'Saul Cujaban',
-  'Tatiana Mesa', 'Wilman Yesid Farfan', 'Wilmer Naranjo',
-  'Wilson Parra', 'Yenny Buitrago', 'Yonhy Villamizar',
-  'Yudy Romero', 'Zahira Franco', 'Zayra Paola Caballero'
+'Adriana Rodriguez Benito',
+'Alex Perea',
+'Aleyda Peña',
+'Alvaro Leonardo Garzon',
+'Alvaro Vasquez Latorre',
+'Andrea Avila',
+'Andres Alexander Pinzon',
+'Angel Javier medina',
+'Ariel Gil',
+'Blanca Cecilia Hernandez',
+'Brayan Cardozo',
+'Carlos Alberto Navarro',
+'Carlos Pinzon',
+'Carlos Roberto Fonseca',
+'Cesar Agusto Caballero',
+'Claudio Duque',
+'Dahian Andrea Martinez',
+'Daniel Puentes',
+'Diana Caterine Tache',
+'Diego David Arciniegas',
+'Doris Cañon',
+'Edgar David Zabaleta',
+'Edgar Lemus',
+'Edgar Nemesio Torres',
+'Edgar Orlando Duarte',
+'Edwar Alfonso Guzman',
+'Edison Enoc Rojas',
+'Edwin Alexander Gonzalez',
+'Edwin Mauricio Beltran',
+'Erick Edison Gomez',
+'Favio Narvaez',
+'Fidel Ramiro Gutierrez',
+'Fredy Andres de salvador',
+'Giovanny Zamora',
+'Hernan David Mendoza',
+'Heyner Hernan Rodriguez',
+'Humberto Ricaurte Camargo',
+'Janeth Rosalba Rincon',
+'Jeraldyn Marcela Jiménez López',
+'Jesus Fernando Contreras',
+'Jhon Cabezas',
+'Jhony Mejia',
+'Joan Alexander Romero',
+'Johan Jimenez',
+'Johslein Darío Largo Palau',
+'Jorge Bahamon',
+'Jorge Caina',
+'Jorge Enrique Chaparro',
+'Jorge Libardo Villamil',
+'Jorge Luis Mojica',
+'Jorge Mauricio Vega',
+'Jose Agustin Godoy',
+'Jose Alberto Burgos',
+'Jose Fernando Moreno',
+'Juan Gabriel Gutierrez',
+'Julio Cesar Supelano',
+'July Marcela Castellanos',
+'Kevin Danilo Forero Bejarano',
+'Laura Katerine Meneses',
+'Leidi Niyreth Leon Torres',
+'Leonardo leguizamón Chaparro',
+'Luz Miriam Cruz',
+'Luz Miryam Rodriguez',
+'Maria Claudia Gelvez',
+'Martha Isabel Bustos',
+'Miguel Eduardo Diaz',
+'Naira Dina Velasco',
+'Nelson Fernando Cardona',
+'Orlando Galindo Garzón',
+'Orlando Mican Silva',
+'Oscar Heli Gonzalez',
+'Oscar Ivan Gomez',
+'Rafael Pizarro',
+'Roberto Iregui',
+'Robinson Castiblanco',
+'Ruben Dario Pineda',
+'Samuel Enrique Merchán',
+'Sandra Espinosa',
+'Sandra Rocio Angarita',
+'Victor Gutierrez',
+'Vilma Ruth Casaguas',
+'Walter Contreras Ibagón',
+'William Javier Gomez',
+'Wilmar Alexander Parra',
+'Wilmer Eduardo Galvis',
+'Yenny del Carmen Palacios',
+'Yeison Alberto Romero',
+'Yury Gonzalez'
 ]
+
+const MAX_PDF_SIZE = 20 * 1024 * 1024   // 20 MB
+const MAX_EXCEL_SIZE = 10 * 1024 * 1024 // 10 MB
+
+async function esPDFValido(file: File): Promise<boolean> {
+  if (file.size > MAX_PDF_SIZE) return false
+  const buf = await file.slice(0, 4).arrayBuffer()
+  const b = new Uint8Array(buf)
+  return b[0] === 0x25 && b[1] === 0x50 && b[2] === 0x44 && b[3] === 0x46 // %PDF
+}
+
+async function esExcelValido(file: File): Promise<boolean> {
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!['xls', 'xlsx'].includes(ext ?? '')) return false
+  if (file.size > MAX_EXCEL_SIZE) return false
+  const buf = await file.slice(0, 4).arrayBuffer()
+  const b = new Uint8Array(buf)
+  const esXlsx = b[0] === 0x50 && b[1] === 0x4B && b[2] === 0x03 && b[3] === 0x04
+  const esXls  = b[0] === 0xD0 && b[1] === 0xCF && b[2] === 0x11 && b[3] === 0xE0
+  return esXlsx || esXls
+}
+
+function sanitizarTrimestre(valor: string): string {
+  // Solo permite letras (con tildes), números, guiones, guion bajo y espacios
+  return valor.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ0-9\-_ ]/g, '').slice(0, 50).trim()
+}
 
 function nombreAEmail(nombre: string) {
   return nombre.toLowerCase()
@@ -339,10 +429,17 @@ export default function App() {
     setErrorAdmin(''); setMensajeAdmin('')
     if (!pdfFile) return setErrorAdmin('Selecciona un archivo PDF')
     if (!trimestreAdmin) return setErrorAdmin('Escribe el nombre del trimestre')
+
+    const trimestreLimpio = sanitizarTrimestre(trimestreAdmin)
+    if (!trimestreLimpio) return setErrorAdmin('El nombre del trimestre contiene caracteres no permitidos')
+
+    if (!await esPDFValido(pdfFile))
+      return setErrorAdmin('El archivo no es un PDF válido o supera los 20 MB')
+
     setSubiendo(true)
 
     try {
-      const nombreArchivo = `${trimestreAdmin}.pdf`
+      const nombreArchivo = `${trimestreLimpio}.pdf`
       const { error: errStorage } = await supabase.storage
         .from('horarios')
         .upload(nombreArchivo, pdfFile, { upsert: true })
@@ -377,7 +474,7 @@ export default function App() {
           nombre_profesor: nombreProfe,
           contenido: pdfUrl,
           pagina: i,
-          trimestre: trimestreAdmin
+          trimestre: trimestreLimpio
         }, { onConflict: 'nombre_profesor,trimestre' })
 
         guardados++
@@ -398,6 +495,11 @@ export default function App() {
   let errores = 0
 
   for (const archivo of excelFiles) {
+    if (!await esExcelValido(archivo)) {
+      errores++
+      continue
+    }
+
     const { error } = await supabase.storage
       .from('fichas')
       .upload(archivo.name, archivo, {
