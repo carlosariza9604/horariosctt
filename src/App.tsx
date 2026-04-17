@@ -379,7 +379,7 @@ export default function App() {
       .then(({ data }) => {
         if (data?.created_at) {
           const fecha = new Date(data.created_at)
-          setUltimaActualizacion(fecha.toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
+          setUltimaActualizacion(fecha.toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' }))
         }
       })
 
