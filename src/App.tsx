@@ -372,8 +372,17 @@ export default function App() {
   const [subiendoZip, setSubiendoZip] = useState(false)
   const [mensajeZip, setMensajeZip] = useState('')
   const [errorZip, setErrorZip] = useState('')
+  const [ultimaActualizacion, setUltimaActualizacion] = useState<string | null>(null)
 
   useEffect(() => {
+    supabase.from('horarios').select('created_at').order('created_at', { ascending: false }).limit(1).single()
+      .then(({ data }) => {
+        if (data?.created_at) {
+          const fecha = new Date(data.created_at)
+          setUltimaActualizacion(fecha.toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
+        }
+      })
+
     supabase.auth.getSession().then(({ data: { session } }: any) => {
       setSession(session)
       if (session) cargarPerfil(session.user.id)
@@ -524,6 +533,17 @@ export default function App() {
 
   if (!session) return (
     <div style={s.center}>
+      {ultimaActualizacion && (
+        <div style={{
+          position: 'fixed', top: '1rem', left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: '#fffbeb', border: '1px solid #f59e0b',
+          borderRadius: '0.5rem', padding: '0.5rem 1rem',
+          fontSize: '0.82rem', color: '#92400e', whiteSpace: 'nowrap',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+        }}>
+          📅 Última actualización de horarios: <strong>{ultimaActualizacion}</strong>
+        </div>
+      )}
       <div style={s.card}>
        <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
         <p style={{ margin: 0, fontSize: '0.75rem', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
