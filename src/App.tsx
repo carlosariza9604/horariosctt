@@ -378,8 +378,10 @@ export default function App() {
     supabase.from('horarios').select('created_at').order('created_at', { ascending: false }).limit(1).single()
       .then(({ data }) => {
         if (data?.created_at) {
-          // Resta 5 horas manualmente (UTC-5 Colombia) sin depender de Intl
-          const utc = new Date(data.created_at)
+          // Fuerza interpretacion UTC: Supabase a veces omite el sufijo de zona horaria
+          const raw: string = data.created_at
+          const isoUtc = raw.replace(' ', 'T').replace(/(\+00|Z)?$/, 'Z').replace('ZZ', 'Z')
+          const utc = new Date(isoUtc)
           const bogota = new Date(utc.getTime() - 5 * 60 * 60 * 1000)
           const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
           const dia = String(bogota.getUTCDate()).padStart(2, '0')
