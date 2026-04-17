@@ -378,8 +378,18 @@ export default function App() {
     supabase.from('horarios').select('created_at').order('created_at', { ascending: false }).limit(1).single()
       .then(({ data }) => {
         if (data?.created_at) {
-          const fecha = new Date(data.created_at)
-          setUltimaActualizacion(fecha.toLocaleString('es-CO', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/Bogota' }))
+          // Resta 5 horas manualmente (UTC-5 Colombia) sin depender de Intl
+          const utc = new Date(data.created_at)
+          const bogota = new Date(utc.getTime() - 5 * 60 * 60 * 1000)
+          const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+          const dia = String(bogota.getUTCDate()).padStart(2, '0')
+          const mes = meses[bogota.getUTCMonth()]
+          const anio = bogota.getUTCFullYear()
+          const h = bogota.getUTCHours()
+          const min = String(bogota.getUTCMinutes()).padStart(2, '0')
+          const ampm = h >= 12 ? 'p. m.' : 'a. m.'
+          const h12 = h % 12 || 12
+          setUltimaActualizacion(`${dia} de ${mes} de ${anio}, ${h12}:${min} ${ampm}`)
         }
       })
 
