@@ -352,6 +352,67 @@ function ListaFichas() {
     </div>
   )
 }
+
+function BuscadorFichasInstructor() {
+  const [fichas, setFichas] = useState<any[]>([])
+  const [busqueda, setBusqueda] = useState('')
+
+  useEffect(() => {
+    supabase.storage
+      .from('fichas')
+      .list('', { limit: 1000, sortBy: { column: 'name', order: 'asc' } })
+      .then(({ data, error }) => { if (!error) setFichas(data || []) })
+  }, [])
+
+  const fichasFiltradas = fichas.filter(f =>
+    f.name.toLowerCase().includes(busqueda.toLowerCase())
+  )
+
+  return (
+    <div style={{ marginTop: '2rem', backgroundColor: 'white', borderRadius: '1rem', padding: '1.25rem', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+      <h3 style={{ margin: '0 0 0.75rem 0', color: '#1a1a2e' }}>📋 Descargar listado de ficha</h3>
+      <input
+        type="text"
+        placeholder="🔍 Buscar por número de ficha..."
+        value={busqueda}
+        onChange={e => setBusqueda(e.target.value)}
+        style={{ ...s.input, marginBottom: '0.75rem' }}
+      />
+      {fichas.length === 0 && (
+        <p style={{ color: '#999', fontSize: '0.9rem' }}>No hay fichas disponibles aún.</p>
+      )}
+      {fichasFiltradas.length === 0 && fichas.length > 0 && (
+        <p style={{ color: '#999', fontSize: '0.9rem' }}>No se encontró ninguna ficha.</p>
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto' }}>
+        {fichasFiltradas.map(ficha => (
+          <div key={ficha.name} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '0.6rem 0.75rem', backgroundColor: '#f8f9ff',
+            borderRadius: '0.5rem', border: '1px solid #e0e7ff'
+          }}>
+            <span style={{ fontSize: '0.9rem', color: '#333' }}>
+              📄 {ficha.name.replace(/\.(xls|xlsx)$/i, '')}
+            </span>
+            <button
+              onClick={() => {
+                const { data } = supabase.storage.from('fichas').getPublicUrl(ficha.name)
+                window.open(data.publicUrl, '_blank')
+              }}
+              style={{
+                backgroundColor: '#4f46e5', color: 'white',
+                border: 'none', padding: '0.3rem 0.7rem',
+                borderRadius: '0.5rem', cursor: 'pointer', fontSize: '0.85rem'
+              }}>
+              ⬇️ Descargar
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [session, setSession] = useState<any>(null)
   const [perfil, setPerfil] = useState<any>(null)
@@ -674,6 +735,7 @@ export default function App() {
             )}
           </>
         )}
+        <BuscadorFichasInstructor />
       </div>
     </div>
   )
