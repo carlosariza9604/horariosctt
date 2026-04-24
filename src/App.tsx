@@ -95,7 +95,8 @@ const NOMBRES = [
 'Wilmer Eduardo Galvis',
 'Yenny del Carmen Palacios',
 'Yeison Alberto Romero',
-'Yury Gonzalez'
+'Yury Gonzalez',
+'Leandro Cardenas'
 ]
 
 const MAX_PDF_SIZE = 20 * 1024 * 1024   // 20 MB
